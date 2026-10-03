@@ -1,0 +1,275 @@
+<title>Pi Home MCP 設計図</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* Layout: 1カラムの設計書。図 → 接続方式 → ツール → 境界 → ロードマップ → 未決事項 → 変更履歴 */
+:root {
+  --bg: #f6f7f7;
+  --surface: #ffffff;
+  --fg: #1d2326;
+  --muted: #5d676c;
+  --line: #d5dadc;
+  --accent: #b5174b;      /* ラズベリー色: 「今やっていること」だけに使う */
+  --accent-soft: #f7e3ea;
+  --ok: #2f7a4f;
+  --ok-soft: #e1f0e7;
+  --warn: #8a5a00;
+  --warn-soft: #f6ecd6;
+  --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181a; --surface: #1c2124; --fg: #e3e8ea; --muted: #97a2a7; --line: #323a3e;
+    --accent: #f0628f; --accent-soft: #3a1a26; --ok: #6cc394; --ok-soft: #173024;
+    --warn: #e0b45c; --warn-soft: #33290f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14181a; --surface: #1c2124; --fg: #e3e8ea; --muted: #97a2a7; --line: #323a3e;
+  --accent: #f0628f; --accent-soft: #3a1a26; --ok: #6cc394; --ok-soft: #173024;
+  --warn: #e0b45c; --warn-soft: #33290f; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.75;
+  margin: 0; padding-inline: 16px; padding-block: 40px 64px;
+}
+.page { max-width: 960px; margin: 0 auto; display: grid; gap: 48px; }
+h1, h2 { text-wrap: balance; line-height: 1.35; margin: 0; }
+h1 { font-size: 1.9rem; font-weight: 700; }
+h2 { font-size: 1.15rem; font-weight: 700; display: flex; align-items: baseline; gap: 10px; }
+h2 .id { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); font-weight: 400; }
+p { margin: 0; max-width: 65ch; }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+section { display: grid; gap: 16px; min-width: 0; }
+
+header { display: grid; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 24px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: var(--font-mono); font-size: .8rem; color: var(--muted); }
+.meta b { color: var(--fg); font-weight: 500; }
+.lead { color: var(--muted); }
+
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 12px; }
+.diagram { overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 680px; height: auto; color: var(--fg); }
+figcaption { font-size: .85rem; color: var(--muted); }
+svg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+svg .zone { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+svg .pi { fill: var(--bg); stroke: var(--fg); stroke-width: 1.5; }
+svg .hot { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+svg .t { fill: var(--fg); font-family: var(--font-body); font-size: 13px; }
+svg .t-b { fill: var(--fg); font-family: var(--font-body); font-size: 14px; font-weight: 700; }
+svg .t-s { fill: var(--muted); font-family: var(--font-body); font-size: 11.5px; }
+svg .t-m { fill: var(--fg); font-family: var(--font-mono); font-size: 12.5px; font-weight: 500; }
+svg .t-z { fill: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; }
+svg .t-a { fill: var(--accent); font-family: var(--font-body); font-size: 12px; font-weight: 700; }
+svg .e { stroke: currentColor; stroke-width: 1.5; fill: none; }
+svg .e-hot { stroke: var(--accent); stroke-width: 2.2; fill: none; }
+svg .e-future { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 6 5; fill: none; }
+svg .head { fill: currentColor; }
+svg .head-hot { fill: var(--accent); }
+svg .head-future { fill: var(--muted); }
+
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 560px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .75rem; letter-spacing: .06em; color: var(--muted); font-weight: 500; background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.pill { display: inline-block; font-size: .75rem; line-height: 1; padding: 5px 8px; border-radius: 99px; white-space: nowrap; font-weight: 500; }
+.pill.now { background: var(--accent-soft); color: var(--accent); }
+.pill.plan { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.pill.done { background: var(--ok-soft); color: var(--ok); }
+.pill.read { background: var(--ok-soft); color: var(--ok); }
+.pill.write { background: var(--warn-soft); color: var(--warn); }
+
+ul.rules { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; max-width: 70ch; }
+
+ol.roadmap { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+ol.roadmap li { display: grid; grid-template-columns: 88px 1fr; gap: 16px; padding-block: 14px; border-top: 1px solid var(--line); }
+ol.roadmap li:last-child { border-bottom: 1px solid var(--line); }
+ol.roadmap .ph { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); padding-top: 3px; }
+ol.roadmap li.current .ph { color: var(--accent); font-weight: 500; }
+ol.roadmap .body { display: grid; gap: 4px; min-width: 0; }
+ol.roadmap .body strong { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
+
+.questions { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.questions li { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; display: grid; gap: 2px; }
+.questions li b { font-weight: 500; }
+.questions li span { color: var(--muted); font-size: .88rem; }
+
+.log { font-size: .88rem; }
+.log td:first-child { width: 120px; }
+
+@media (max-width: 520px) {
+  h1 { font-size: 1.5rem; }
+  ol.roadmap li { grid-template-columns: 1fr; gap: 4px; }
+}
+</style>
+
+<div class="page">
+
+<header>
+  <div class="meta"><span>hellow-mcp / architecture</span><span>版 <b>v0.1</b></span><span>更新 <b>2026-10-03</b></span><span>状態 <b>構想</b></span></div>
+  <h1>Pi Home MCP 設計図</h1>
+  <p class="lead">自宅の Raspberry Pi で MCP サーバーを動かし、Claude から家のサーバーやセンサーを安全に扱えるようにする。この HTML を設計の正本とし、決まったことをここに反映しながら育てていく。</p>
+</header>
+
+<section id="overview">
+  <h2><span class="id">A1</span>全体構成</h2>
+  <figure>
+    <div class="diagram">
+      <svg viewBox="0 0 960 440" role="img" aria-label="Claude Desktop と Claude Code は SSH または Tailscale で自宅 LAN の Raspberry Pi 上の MCP サーバーへ接続する。claude.ai は将来 Cloudflare Tunnel と OAuth 経由で接続する。MCP サーバーは許可リストを通して5つのツール群を呼び出す。">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head"/></marker>
+          <marker id="ah-hot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head-hot"/></marker>
+          <marker id="ah-fu" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head-future"/></marker>
+        </defs>
+
+        <!-- 左: Claude -->
+        <text x="20" y="40" class="t-z">CLAUDE 側</text>
+        <rect x="20" y="80" width="180" height="90" rx="6" class="box"/>
+        <text x="110" y="118" text-anchor="middle" class="t-b">Claude Desktop</text>
+        <text x="110" y="140" text-anchor="middle" class="t-b">Claude Code</text>
+        <text x="110" y="160" text-anchor="middle" class="t-s">手元の PC</text>
+
+        <rect x="20" y="300" width="180" height="70" rx="6" class="box"/>
+        <text x="110" y="330" text-anchor="middle" class="t-b">claude.ai</text>
+        <text x="110" y="352" text-anchor="middle" class="t-s">Web・スマホ</text>
+
+        <!-- 中: インターネット -->
+        <rect x="270" y="304" width="150" height="62" rx="6" class="box"/>
+        <text x="345" y="331" text-anchor="middle" class="t">Cloudflare</text>
+        <text x="345" y="351" text-anchor="middle" class="t-s">Tunnel + OAuth</text>
+
+        <!-- 右: 自宅 LAN -->
+        <rect x="470" y="24" width="470" height="400" rx="10" class="zone"/>
+        <text x="486" y="46" class="t-z">自宅 LAN</text>
+        <rect x="496" y="60" width="428" height="350" rx="8" class="pi"/>
+        <text x="512" y="84" class="t-b">Raspberry Pi</text>
+        <text x="620" y="84" class="t-s">専用ユーザー mcp で実行</text>
+
+        <rect x="516" y="100" width="160" height="290" rx="6" class="hot"/>
+        <text x="596" y="200" text-anchor="middle" class="t-b">MCP サーバー</text>
+        <text x="596" y="222" text-anchor="middle" class="t-s">Python / FastMCP</text>
+        <line x1="536" y1="244" x2="656" y2="244" stroke="var(--line)" stroke-width="1"/>
+        <text x="596" y="268" text-anchor="middle" class="t-s">許可リスト</text>
+        <text x="596" y="286" text-anchor="middle" class="t-m">config.yaml</text>
+
+        <!-- ツール群 -->
+        <g>
+          <rect x="716" y="100" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="121" class="t-m">system</text><text x="730" y="140" class="t-s">温度・ディスク・メモリ</text>
+          <rect x="716" y="160" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="181" class="t-m">docker</text><text x="730" y="200" class="t-s">コンテナ一覧・再起動</text>
+          <rect x="716" y="220" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="241" class="t-m">sensors</text><text x="730" y="260" class="t-s">温湿度・カメラ・GPIO</text>
+          <rect x="716" y="280" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="301" class="t-m">home</text><text x="730" y="320" class="t-s">家電・Wake-on-LAN</text>
+          <rect x="716" y="340" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="361" class="t-m">data</text><text x="730" y="380" class="t-s">SQLite（在庫・メモ）</text>
+        </g>
+        <path d="M676 125 H712" class="e" marker-end="url(#ah)"/>
+        <path d="M676 185 H712" class="e" marker-end="url(#ah)"/>
+        <path d="M676 245 H712" class="e" marker-end="url(#ah)"/>
+        <path d="M676 305 H712" class="e" marker-end="url(#ah)"/>
+        <path d="M676 365 H712" class="e" marker-end="url(#ah)"/>
+
+        <!-- 接続 ① ② ③ -->
+        <path d="M200 112 H512" class="e-hot" marker-end="url(#ah-hot)"/>
+        <text x="225" y="104" class="t-a">① SSH + stdio（LAN 内）</text>
+        <path d="M200 150 H512" class="e" marker-end="url(#ah)"/>
+        <text x="225" y="142" class="t">② HTTP / Tailscale（外出先 PC）</text>
+        <path d="M200 335 H266" class="e-future" marker-end="url(#ah-fu)"/>
+        <path d="M420 335 H512" class="e-future" marker-end="url(#ah-fu)"/>
+        <text x="228" y="392" class="t-s">③ HTTPS（将来・インターネット公開）</text>
+      </svg>
+    </div>
+    <figcaption>色付きの線が最初に作る経路（①）。破線の③はインターネットに公開するため、認証が整うまで作らない。MCP サーバーはどのツールも許可リスト越しにしか実行しない。</figcaption>
+  </figure>
+</section>
+
+<section id="transport">
+  <h2><span class="id">A2</span>接続方式</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>経路</th><th>使える Claude</th><th>届く範囲</th><th>認証</th><th>状態</th></tr></thead>
+      <tbody>
+        <tr><td>① SSH + stdio</td><td>Desktop / Code</td><td>家の LAN 内</td><td>SSH 鍵</td><td><span class="pill now">Phase 1</span></td></tr>
+        <tr><td>② HTTP + Tailscale</td><td>Desktop / Code</td><td>Tailscale に参加した端末</td><td>Tailscale の端末認証</td><td><span class="pill plan">Phase 3</span></td></tr>
+        <tr><td>③ HTTPS + Cloudflare Tunnel</td><td>claude.ai（Web・スマホ）</td><td>インターネット</td><td>OAuth 必須</td><td><span class="pill plan">Phase 4</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>claude.ai のカスタムコネクタは Anthropic のクラウドから接続してくるため、Tailscale の内側には届かない。スマホから使いたい場合だけ③が必要になる。</p>
+</section>
+
+<section id="tools">
+  <h2><span class="id">A3</span>ツール一覧</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ツール名</th><th>内容</th><th>種別</th><th>フェーズ</th><th>状態</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">get_system_status</td><td>CPU 温度、負荷、メモリ、ディスク残量、稼働時間</td><td><span class="pill read">読取</span></td><td class="num">P0</td><td><span class="pill plan">計画中</span></td></tr>
+        <tr><td class="mono">list_services</td><td>systemd サービスと Docker コンテナの状態</td><td><span class="pill read">読取</span></td><td class="num">P2</td><td><span class="pill plan">計画中</span></td></tr>
+        <tr><td class="mono">read_logs</td><td>許可したログファイルの末尾 N 行</td><td><span class="pill read">読取</span></td><td class="num">P2</td><td><span class="pill plan">計画中</span></td></tr>
+        <tr><td class="mono">restart_container</td><td>許可リストにあるコンテナだけ再起動</td><td><span class="pill write">操作</span></td><td class="num">P2</td><td><span class="pill plan">計画中</span></td></tr>
+        <tr><td class="mono">read_sensor</td><td>BME280 の温度・湿度・気圧</td><td><span class="pill read">読取</span></td><td class="num">P3</td><td><span class="pill plan">計画中</span></td></tr>
+        <tr><td class="mono">take_snapshot</td><td>カメラで 1 枚撮影して画像を返す</td><td><span class="pill read">読取</span></td><td class="num">P3</td><td><span class="pill plan">計画中</span></td></tr>
+        <tr><td class="mono">wake_on_lan</td><td>登録済みの PC を起動</td><td><span class="pill write">操作</span></td><td class="num">P3</td><td><span class="pill plan">計画中</span></td></tr>
+        <tr><td class="mono">inventory_*</td><td>家の在庫・メモを SQLite で管理</td><td><span class="pill write">操作</span></td><td class="num">P3</td><td><span class="pill plan">計画中</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="security">
+  <h2><span class="id">A4</span>セキュリティ方針</h2>
+  <ul class="rules">
+    <li>任意のシェルコマンドを実行するツールは作らない。</li>
+    <li>操作系のツールは <code>config.yaml</code> の許可リストにある対象にだけ効く。</li>
+    <li>MCP サーバーは専用の低権限ユーザー <code>mcp</code> で動かす。Docker 操作に必要な権限だけを追加する。</li>
+    <li>まず読取ツールだけで運用し、操作ツールは1つずつ増やす。</li>
+    <li>認証なしでインターネットに公開しない。③は OAuth を入れてから作る。</li>
+  </ul>
+</section>
+
+<section id="roadmap">
+  <h2><span class="id">A5</span>ロードマップ</h2>
+  <ol class="roadmap">
+    <li class="current"><div class="ph">PHASE 0</div><div class="body"><strong>手元の PC で雛形を作る <span class="pill now">次にやる</span></strong><span>Pi なしで FastMCP サーバーと <code>get_system_status</code> を作り、Claude Desktop / Code から呼べることを確認する。</span></div></li>
+    <li><div class="ph">PHASE 1</div><div class="body"><strong>Pi に載せて SSH で接続</strong><span>Raspberry Pi OS を用意し、systemd 不要の stdio 起動で①の経路を通す。</span></div></li>
+    <li><div class="ph">PHASE 2</div><div class="body"><strong>サーバー管理ツールを増やす</strong><span>Docker、ログ、サービス状態。操作系は許可リスト付きで追加する。</span></div></li>
+    <li><div class="ph">PHASE 3</div><div class="body"><strong>センサー・家電と外出先接続</strong><span>BME280、カメラ、Wake-on-LAN、SQLite。HTTP 化して Tailscale（②）で外から使う。</span></div></li>
+    <li><div class="ph">PHASE 4</div><div class="body"><strong>claude.ai からの接続</strong><span>OAuth を実装し、Cloudflare Tunnel（③）でスマホから使えるようにする。</span></div></li>
+  </ol>
+</section>
+
+<section id="open">
+  <h2><span class="id">A6</span>未決事項</h2>
+  <ul class="questions">
+    <li><b>Raspberry Pi の機種とストレージ</b><span>Pi 5 + SSD か、Pi 4 + microSD か。Docker を常用するなら SSD が望ましい。</span></li>
+    <li><b>実装言語</b><span>暫定で Python（FastMCP）。GPIO・センサーのライブラリが豊富なため。</span></li>
+    <li><b>Docker 権限の渡し方</b><span><code>docker</code> グループは実質 root 相当。sudoers で特定コマンドだけ許可する案と比較する。</span></li>
+    <li><b>家電連携の手段</b><span>SwitchBot API、Nature Remo、赤外線モジュール自作のどれにするか。</span></li>
+  </ul>
+</section>
+
+<section id="changelog">
+  <h2><span class="id">A7</span>変更履歴</h2>
+  <div class="table-wrap">
+    <table class="log">
+      <thead><tr><th>日付</th><th>版</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.1</td><td>初版。全体構成、接続方式、ツール案、ロードマップを記載。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div>
