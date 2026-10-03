@@ -1,22 +1,22 @@
-<title>Pi Home MCP 設計図</title>
+<title>Pi Home MCP Design</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;700&display=swap">
 <style>
-/* Layout: 1カラムの設計書。図 → 接続方式 → ツール → 境界 → ロードマップ → 未決事項 → 変更履歴 */
+/* Layout: single-column design doc. Diagram -> connections -> tools -> security -> roadmap -> open questions -> changelog */
 :root {
   --bg: #f6f7f7;
   --surface: #ffffff;
   --fg: #1d2326;
   --muted: #5d676c;
   --line: #d5dadc;
-  --accent: #b5174b;      /* ラズベリー色: 「今やっていること」だけに使う */
+  --accent: #b5174b;      /* raspberry: used only for what is being worked on now */
   --accent-soft: #f7e3ea;
   --ok: #2f7a4f;
   --ok-soft: #e1f0e7;
   --warn: #8a5a00;
   --warn-soft: #f6ecd6;
-  --font-body: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
@@ -115,64 +115,64 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 <div class="page">
 
 <header>
-  <div class="meta"><span>hellow-mcp / architecture</span><span>版 <b>v0.3</b></span><span>更新 <b>2026-10-03</b></span><span>状態 <b>構想</b></span></div>
-  <h1>Pi Home MCP 設計図</h1>
-  <p class="lead">自宅の Raspberry Pi で MCP サーバーを動かし、Claude から家のサーバーやセンサーを安全に扱えるようにする。このページは設計を理解するための図解で、決まったことを反映しながら育てていく。</p>
+  <div class="meta"><span>hellow-mcp / architecture</span><span>Version <b>v0.4</b></span><span>Updated <b>2026-10-03</b></span><span>Status <b>Concept</b></span></div>
+  <h1>Pi Home MCP Design</h1>
+  <p class="lead">Run an MCP server on the Raspberry Pi at home so that Claude can safely work with the home server and its sensors. This page is a visual overview to help understand the design, and it grows as decisions are made.</p>
 </header>
 
 <section id="overview">
-  <h2><span class="id">1</span>全体構成</h2>
+  <h2><span class="id">1</span>System overview</h2>
   <figure>
     <div class="diagram">
-      <svg viewBox="0 0 960 440" role="img" aria-label="Claude Desktop と Claude Code は SSH または Tailscale で自宅 LAN の Raspberry Pi 上の MCP サーバーへ接続する。claude.ai は将来 Cloudflare Tunnel と OAuth 経由で接続する。MCP サーバーは許可リストを通して5つのツール群を呼び出す。">
+      <svg viewBox="0 0 960 440" role="img" aria-label="Claude Desktop and Claude Code connect to the MCP server on the Raspberry Pi in the home LAN over SSH or Tailscale. claude.ai will later connect through Cloudflare Tunnel with OAuth. The MCP server calls five tool groups through an allowlist.">
         <defs>
           <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head"/></marker>
           <marker id="ah-hot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head-hot"/></marker>
           <marker id="ah-fu" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head-future"/></marker>
         </defs>
 
-        <!-- 左: Claude -->
-        <text x="20" y="40" class="t-z">CLAUDE 側</text>
+        <!-- Left: Claude -->
+        <text x="20" y="40" class="t-z">CLAUDE</text>
         <rect x="20" y="80" width="180" height="90" rx="6" class="box"/>
         <text x="110" y="118" text-anchor="middle" class="t-b">Claude Desktop</text>
         <text x="110" y="140" text-anchor="middle" class="t-b">Claude Code</text>
-        <text x="110" y="160" text-anchor="middle" class="t-s">手元の PC</text>
+        <text x="110" y="160" text-anchor="middle" class="t-s">Your PC</text>
 
         <rect x="20" y="300" width="180" height="70" rx="6" class="box"/>
         <text x="110" y="330" text-anchor="middle" class="t-b">claude.ai</text>
-        <text x="110" y="352" text-anchor="middle" class="t-s">Web・スマホ</text>
+        <text x="110" y="352" text-anchor="middle" class="t-s">Web and mobile</text>
 
-        <!-- 中: インターネット -->
+        <!-- Middle: internet -->
         <rect x="270" y="304" width="150" height="62" rx="6" class="box"/>
         <text x="345" y="331" text-anchor="middle" class="t">Cloudflare</text>
         <text x="345" y="351" text-anchor="middle" class="t-s">Tunnel + OAuth</text>
 
-        <!-- 右: 自宅 LAN -->
+        <!-- Right: home LAN -->
         <rect x="470" y="24" width="470" height="400" rx="10" class="zone"/>
-        <text x="486" y="46" class="t-z">自宅 LAN</text>
+        <text x="486" y="46" class="t-z">HOME LAN</text>
         <rect x="496" y="60" width="428" height="350" rx="8" class="pi"/>
         <text x="512" y="84" class="t-b">Raspberry Pi 4</text>
-        <text x="636" y="84" class="t-s">専用ユーザー mcp で実行</text>
+        <text x="636" y="84" class="t-s">Runs as the dedicated user mcp</text>
 
         <rect x="516" y="100" width="160" height="290" rx="6" class="hot"/>
-        <text x="596" y="200" text-anchor="middle" class="t-b">MCP サーバー</text>
+        <text x="596" y="200" text-anchor="middle" class="t-b">MCP server</text>
         <text x="596" y="222" text-anchor="middle" class="t-s">Python / FastMCP</text>
         <line x1="536" y1="244" x2="656" y2="244" stroke="var(--line)" stroke-width="1"/>
-        <text x="596" y="268" text-anchor="middle" class="t-s">許可リスト</text>
+        <text x="596" y="268" text-anchor="middle" class="t-s">Allowlist</text>
         <text x="596" y="286" text-anchor="middle" class="t-m">config.yaml</text>
 
-        <!-- ツール群 -->
+        <!-- Tool groups -->
         <g>
           <rect x="716" y="100" width="190" height="50" rx="5" class="box"/>
-          <text x="730" y="121" class="t-m">system</text><text x="730" y="140" class="t-s">温度・ディスク・メモリ</text>
+          <text x="730" y="121" class="t-m">system</text><text x="730" y="140" class="t-s">Temperature, disk, memory</text>
           <rect x="716" y="160" width="190" height="50" rx="5" class="box"/>
-          <text x="730" y="181" class="t-m">docker</text><text x="730" y="200" class="t-s">コンテナ一覧・再起動</text>
+          <text x="730" y="181" class="t-m">docker</text><text x="730" y="200" class="t-s">List and restart containers</text>
           <rect x="716" y="220" width="190" height="50" rx="5" class="box"/>
-          <text x="730" y="241" class="t-m">sensors</text><text x="730" y="260" class="t-s">温湿度・カメラ・GPIO</text>
+          <text x="730" y="241" class="t-m">sensors</text><text x="730" y="260" class="t-s">Climate, camera, GPIO</text>
           <rect x="716" y="280" width="190" height="50" rx="5" class="box"/>
-          <text x="730" y="301" class="t-m">home</text><text x="730" y="320" class="t-s">家電・Wake-on-LAN</text>
+          <text x="730" y="301" class="t-m">home</text><text x="730" y="320" class="t-s">Appliances, Wake-on-LAN</text>
           <rect x="716" y="340" width="190" height="50" rx="5" class="box"/>
-          <text x="730" y="361" class="t-m">data</text><text x="730" y="380" class="t-s">SQLite（在庫・メモ）</text>
+          <text x="730" y="361" class="t-m">data</text><text x="730" y="380" class="t-s">SQLite (inventory, notes)</text>
         </g>
         <path d="M676 125 H712" class="e" marker-end="url(#ah)"/>
         <path d="M676 185 H712" class="e" marker-end="url(#ah)"/>
@@ -180,95 +180,96 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
         <path d="M676 305 H712" class="e" marker-end="url(#ah)"/>
         <path d="M676 365 H712" class="e" marker-end="url(#ah)"/>
 
-        <!-- 接続 ① ② ③ -->
+        <!-- Connections 1, 2, 3 -->
         <path d="M200 112 H512" class="e-hot" marker-end="url(#ah-hot)"/>
-        <text x="225" y="104" class="t-a">① SSH + stdio（LAN 内）</text>
+        <text x="225" y="104" class="t-a">① SSH + stdio (home LAN)</text>
         <path d="M200 150 H512" class="e" marker-end="url(#ah)"/>
-        <text x="225" y="142" class="t">② HTTP / Tailscale（外出先 PC）</text>
+        <text x="225" y="142" class="t">② HTTP / Tailscale (away from home)</text>
         <path d="M200 335 H266" class="e-future" marker-end="url(#ah-fu)"/>
         <path d="M420 335 H512" class="e-future" marker-end="url(#ah-fu)"/>
-        <text x="228" y="392" class="t-s">③ HTTPS（将来・インターネット公開）</text>
+        <text x="228" y="392" class="t-s">③ HTTPS (future, public)</text>
       </svg>
     </div>
-    <figcaption>色付きの線が最初に作る経路（①）。破線の③はインターネットに公開するため、認証が整うまで作らない。MCP サーバーはどのツールも許可リスト越しにしか実行しない。</figcaption>
+    <figcaption>The colored line is the first route to build (①). The dashed route ③ is exposed to the internet, so it waits until authentication is in place. The MCP server runs every tool only through the allowlist.</figcaption>
   </figure>
 </section>
 
 <section id="transport">
-  <h2><span class="id">2</span>接続方式</h2>
+  <h2><span class="id">2</span>Connection methods</h2>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>経路</th><th>使える Claude</th><th>届く範囲</th><th>認証</th><th>状態</th></tr></thead>
+      <thead><tr><th>Route</th><th>Claude apps</th><th>Reach</th><th>Authentication</th><th>Status</th></tr></thead>
       <tbody>
-        <tr><td>① SSH + stdio</td><td>Desktop / Code</td><td>家の LAN 内</td><td>SSH 鍵</td><td><span class="pill now">Phase 1</span></td></tr>
-        <tr><td>② HTTP + Tailscale</td><td>Desktop / Code</td><td>Tailscale に参加した端末</td><td>Tailscale の端末認証</td><td><span class="pill plan">Phase 3</span></td></tr>
-        <tr><td>③ HTTPS + Cloudflare Tunnel</td><td>claude.ai（Web・スマホ）</td><td>インターネット</td><td>OAuth 必須</td><td><span class="pill plan">Phase 4</span></td></tr>
+        <tr><td>① SSH + stdio</td><td>Desktop / Code</td><td>Home LAN only</td><td>SSH key</td><td><span class="pill now">Phase 1</span></td></tr>
+        <tr><td>② HTTP + Tailscale</td><td>Desktop / Code</td><td>Devices on the tailnet</td><td>Tailscale device auth</td><td><span class="pill plan">Phase 3</span></td></tr>
+        <tr><td>③ HTTPS + Cloudflare Tunnel</td><td>claude.ai (web and mobile)</td><td>Internet</td><td>OAuth required</td><td><span class="pill plan">Phase 4</span></td></tr>
       </tbody>
     </table>
   </div>
-  <p>claude.ai のカスタムコネクタは Anthropic のクラウドから接続してくるため、Tailscale の内側には届かない。スマホから使いたい場合だけ③が必要になる。</p>
+  <p>Custom connectors on claude.ai connect from Anthropic's cloud, so they cannot reach inside Tailscale. Route ③ is needed only for use from a phone.</p>
 </section>
 
 <section id="tools">
-  <h2><span class="id">3</span>ツール一覧</h2>
+  <h2><span class="id">3</span>Tools</h2>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>ツール名</th><th>内容</th><th>種別</th><th>フェーズ</th><th>状態</th></tr></thead>
+      <thead><tr><th>Tool</th><th>What it does</th><th>Type</th><th>Phase</th><th>Status</th></tr></thead>
       <tbody>
-        <tr><td class="mono">get_system_status</td><td>CPU 温度、負荷、メモリ、ディスク残量、稼働時間</td><td><span class="pill read">読取</span></td><td class="num">P0</td><td><span class="pill plan">計画中</span></td></tr>
-        <tr><td class="mono">list_services</td><td>systemd サービスと Docker コンテナの状態</td><td><span class="pill read">読取</span></td><td class="num">P2</td><td><span class="pill plan">計画中</span></td></tr>
-        <tr><td class="mono">read_logs</td><td>許可したログファイルの末尾 N 行</td><td><span class="pill read">読取</span></td><td class="num">P2</td><td><span class="pill plan">計画中</span></td></tr>
-        <tr><td class="mono">restart_container</td><td>許可リストにあるコンテナだけ再起動</td><td><span class="pill write">操作</span></td><td class="num">P2</td><td><span class="pill plan">計画中</span></td></tr>
-        <tr><td class="mono">read_sensor</td><td>BME280 の温度・湿度・気圧</td><td><span class="pill read">読取</span></td><td class="num">P3</td><td><span class="pill plan">計画中</span></td></tr>
-        <tr><td class="mono">take_snapshot</td><td>カメラで 1 枚撮影して画像を返す</td><td><span class="pill read">読取</span></td><td class="num">P3</td><td><span class="pill plan">計画中</span></td></tr>
-        <tr><td class="mono">wake_on_lan</td><td>登録済みの PC を起動</td><td><span class="pill write">操作</span></td><td class="num">P3</td><td><span class="pill plan">計画中</span></td></tr>
-        <tr><td class="mono">inventory_*</td><td>家の在庫・メモを SQLite で管理</td><td><span class="pill write">操作</span></td><td class="num">P3</td><td><span class="pill plan">計画中</span></td></tr>
+        <tr><td class="mono">get_system_status</td><td>CPU temperature, load, memory, free disk, uptime</td><td><span class="pill read">Read</span></td><td class="num">P0</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">list_services</td><td>State of systemd services and Docker containers</td><td><span class="pill read">Read</span></td><td class="num">P2</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">read_logs</td><td>Last N lines of allowed log files</td><td><span class="pill read">Read</span></td><td class="num">P2</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">restart_container</td><td>Restart only containers on the allowlist</td><td><span class="pill write">Action</span></td><td class="num">P2</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">read_sensor</td><td>Temperature, humidity and pressure from a BME280</td><td><span class="pill read">Read</span></td><td class="num">P3</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">take_snapshot</td><td>Take one photo with the camera and return it</td><td><span class="pill read">Read</span></td><td class="num">P3</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">wake_on_lan</td><td>Wake a registered PC</td><td><span class="pill write">Action</span></td><td class="num">P3</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">inventory_*</td><td>Manage household inventory and notes in SQLite</td><td><span class="pill write">Action</span></td><td class="num">P3</td><td><span class="pill plan">Planned</span></td></tr>
       </tbody>
     </table>
   </div>
 </section>
 
 <section id="security">
-  <h2><span class="id">4</span>セキュリティ方針</h2>
+  <h2><span class="id">4</span>Security rules</h2>
   <ul class="rules">
-    <li>任意のシェルコマンドを実行するツールは作らない。</li>
-    <li>操作系のツールは <code>config.yaml</code> の許可リストにある対象にだけ効く。</li>
-    <li>MCP サーバーは専用の低権限ユーザー <code>mcp</code> で動かす。Docker 操作に必要な権限だけを追加する。</li>
-    <li>まず読取ツールだけで運用し、操作ツールは1つずつ増やす。</li>
-    <li>認証なしでインターネットに公開しない。③は OAuth を入れてから作る。</li>
+    <li>Do not build a tool that runs arbitrary shell commands.</li>
+    <li>Action tools only affect targets on the allowlist in <code>config.yaml</code>.</li>
+    <li>Run the MCP server as the dedicated low-privilege user <code>mcp</code>. Add only the permissions Docker operations need.</li>
+    <li>Start with read-only tools, then add action tools one at a time.</li>
+    <li>Never expose the server to the internet without authentication. Build ③ only after OAuth is in place.</li>
   </ul>
 </section>
 
 <section id="roadmap">
-  <h2><span class="id">5</span>ロードマップ</h2>
+  <h2><span class="id">5</span>Roadmap</h2>
   <ol class="roadmap">
-    <li class="current"><div class="ph">PHASE 0</div><div class="body"><strong>手元の PC で雛形を作る <span class="pill now">次にやる</span></strong><span>Pi なしで FastMCP サーバーと <code>get_system_status</code> を作り、Claude Desktop / Code から呼べることを確認する。</span></div></li>
-    <li><div class="ph">PHASE 1</div><div class="body"><strong>Pi に載せて SSH で接続</strong><span>Raspberry Pi OS を用意し、systemd 不要の stdio 起動で①の経路を通す。</span></div></li>
-    <li><div class="ph">PHASE 2</div><div class="body"><strong>サーバー管理ツールを増やす</strong><span>Docker、ログ、サービス状態。操作系は許可リスト付きで追加する。</span></div></li>
-    <li><div class="ph">PHASE 3</div><div class="body"><strong>センサー・家電と外出先接続</strong><span>BME280、カメラ、Wake-on-LAN、SQLite。HTTP 化して Tailscale（②）で外から使う。</span></div></li>
-    <li><div class="ph">PHASE 4</div><div class="body"><strong>claude.ai からの接続</strong><span>OAuth を実装し、Cloudflare Tunnel（③）でスマホから使えるようにする。</span></div></li>
+    <li class="current"><div class="ph">PHASE 0</div><div class="body"><strong>Build a skeleton on your PC <span class="pill now">Next</span></strong><span>Without a Pi, build a FastMCP server with <code>get_system_status</code> and confirm Claude Desktop / Code can call it.</span></div></li>
+    <li><div class="ph">PHASE 1</div><div class="body"><strong>Move it to the Pi and connect over SSH</strong><span>Set up Raspberry Pi OS and open route ① by starting the server over stdio, with no systemd needed.</span></div></li>
+    <li><div class="ph">PHASE 2</div><div class="body"><strong>Add server management tools</strong><span>Docker, logs, service state. Add action tools with an allowlist.</span></div></li>
+    <li><div class="ph">PHASE 3</div><div class="body"><strong>Sensors, appliances and remote access</strong><span>BME280, camera, Wake-on-LAN, SQLite. Switch to HTTP and use it from outside through Tailscale (②).</span></div></li>
+    <li><div class="ph">PHASE 4</div><div class="body"><strong>Connect from claude.ai</strong><span>Implement OAuth and make it usable from a phone through Cloudflare Tunnel (③).</span></div></li>
   </ol>
 </section>
 
 <section id="open">
-  <h2><span class="id">6</span>未決事項</h2>
+  <h2><span class="id">6</span>Open questions</h2>
   <ul class="questions">
-    <li><b>Raspberry Pi 4 のメモリ容量とストレージ</b><span>本体は自宅の Pi 4 を使う方針（実機で型番を要確認）。メモリ容量は未確認。常時稼働のため USB 接続 SSD からの起動を検討する。</span></li>
-    <li><b>実装言語</b><span>暫定で Python（FastMCP）。GPIO・センサーのライブラリが豊富なため。</span></li>
-    <li><b>Docker 権限の渡し方</b><span><code>docker</code> グループは実質 root 相当。sudoers で特定コマンドだけ許可する案と比較する。</span></li>
-    <li><b>家電連携の手段</b><span>SwitchBot API、Nature Remo、赤外線モジュール自作のどれにするか。</span></li>
+    <li><b>Raspberry Pi 4 memory and storage</b><span>The plan is to use the Pi 4 at home (model to be confirmed on the device). Memory size is unconfirmed. For always-on use, consider booting from a USB-connected SSD.</span></li>
+    <li><b>Implementation language</b><span>Python (FastMCP) for now, because GPIO and sensor libraries are plentiful.</span></li>
+    <li><b>How to grant Docker permissions</b><span>The <code>docker</code> group is effectively root. Compare it with allowing only specific commands through sudoers.</span></li>
+    <li><b>Appliance integration</b><span>Choose between the SwitchBot API, Nature Remo, or a homemade infrared module.</span></li>
   </ul>
 </section>
 
 <section id="changelog">
-  <h2><span class="id">7</span>変更履歴</h2>
+  <h2><span class="id">7</span>Changelog</h2>
   <div class="table-wrap">
     <table class="log">
-      <thead><tr><th>日付</th><th>版</th><th>内容</th></tr></thead>
+      <thead><tr><th>Date</th><th>Version</th><th>Changes</th></tr></thead>
       <tbody>
-        <tr><td class="num">2026-10-03</td><td class="num">v0.3</td><td>見出しの番号を A1〜A7 から 1〜7 に変更。このページを理解用の図解と位置づけ直した。</td></tr>
-        <tr><td class="num">2026-10-03</td><td class="num">v0.2</td><td>本体を自宅の Raspberry Pi 4 とする方針を反映（暫定）。メモリとストレージは未決。</td></tr>
-        <tr><td class="num">2026-10-03</td><td class="num">v0.1</td><td>初版。全体構成、接続方式、ツール案、ロードマップを記載。</td></tr>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.4</td><td>Translated the page into English.</td></tr>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.3</td><td>Renumbered sections from A1–A7 to 1–7. Repositioned this page as an overview for understanding the design.</td></tr>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.2</td><td>Recorded the plan to use the Raspberry Pi 4 at home (tentative). Memory and storage are still open.</td></tr>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.1</td><td>First version. Added the system overview, connection methods, tool ideas and roadmap.</td></tr>
       </tbody>
     </table>
   </div>

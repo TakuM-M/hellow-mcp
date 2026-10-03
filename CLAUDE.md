@@ -2,7 +2,7 @@
 
 ## Language
 
-- Write `README.md` and `CLAUDE.md` in English.
+- Write `README.md`, `CLAUDE.md` and `architecture/index.html` in English.
 
 ## Design document
 
