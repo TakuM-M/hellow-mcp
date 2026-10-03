@@ -1,10 +1,14 @@
 # CLAUDE.md
 
-## 設計ドキュメント
+## Language
 
-- システム設計の正本は `architecture/index.html`。
-- 設計に関わる決定や変更をしたら、同じ変更の中でこの HTML も更新する。
-  - 該当セクション（A1 全体構成〜A6 未決事項）を書き換える
-  - 未決事項が決まったら A6 から消し、決定内容を該当セクションに反映する
-  - ヘッダーの版と更新日を上げ、A7 変更履歴に1行追加する
-- 図はインライン SVG で、色は CSS 変数（ライト・ダーク両対応）を使う。外部画像は使わない。
+- Write `README.md` and `CLAUDE.md` in English.
+
+## Design document
+
+- The source of truth for the system design is `architecture/index.html`.
+- When making a design decision or change, update this HTML in the same change.
+  - Rewrite the relevant sections (A1 to A6).
+  - When an open question in A6 is decided, remove it from A6 and reflect the decision in the relevant section.
+  - Bump the version and the updated date in the header, and add one line to the A7 changelog.
+- Draw diagrams as inline SVG, using CSS variables for colors (supporting both light and dark themes). Do not use external images.
