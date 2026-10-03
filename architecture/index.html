@@ -115,7 +115,7 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 <div class="page">
 
 <header>
-  <div class="meta"><span>hellow-mcp / architecture</span><span>版 <b>v0.1</b></span><span>更新 <b>2026-10-03</b></span><span>状態 <b>構想</b></span></div>
+  <div class="meta"><span>hellow-mcp / architecture</span><span>版 <b>v0.2</b></span><span>更新 <b>2026-10-03</b></span><span>状態 <b>構想</b></span></div>
   <h1>Pi Home MCP 設計図</h1>
   <p class="lead">自宅の Raspberry Pi で MCP サーバーを動かし、Claude から家のサーバーやセンサーを安全に扱えるようにする。この HTML を設計の正本とし、決まったことをここに反映しながら育てていく。</p>
 </header>
@@ -151,8 +151,8 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
         <rect x="470" y="24" width="470" height="400" rx="10" class="zone"/>
         <text x="486" y="46" class="t-z">自宅 LAN</text>
         <rect x="496" y="60" width="428" height="350" rx="8" class="pi"/>
-        <text x="512" y="84" class="t-b">Raspberry Pi</text>
-        <text x="620" y="84" class="t-s">専用ユーザー mcp で実行</text>
+        <text x="512" y="84" class="t-b">Raspberry Pi 4</text>
+        <text x="636" y="84" class="t-s">専用ユーザー mcp で実行</text>
 
         <rect x="516" y="100" width="160" height="290" rx="6" class="hot"/>
         <text x="596" y="200" text-anchor="middle" class="t-b">MCP サーバー</text>
@@ -253,7 +253,7 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 <section id="open">
   <h2><span class="id">A6</span>未決事項</h2>
   <ul class="questions">
-    <li><b>Raspberry Pi の機種とストレージ</b><span>Pi 5 + SSD か、Pi 4 + microSD か。Docker を常用するなら SSD が望ましい。</span></li>
+    <li><b>Raspberry Pi 4 のメモリ容量とストレージ</b><span>本体は自宅の Pi 4 を使う方針（実機で型番を要確認）。メモリ容量は未確認。常時稼働のため USB 接続 SSD からの起動を検討する。</span></li>
     <li><b>実装言語</b><span>暫定で Python（FastMCP）。GPIO・センサーのライブラリが豊富なため。</span></li>
     <li><b>Docker 権限の渡し方</b><span><code>docker</code> グループは実質 root 相当。sudoers で特定コマンドだけ許可する案と比較する。</span></li>
     <li><b>家電連携の手段</b><span>SwitchBot API、Nature Remo、赤外線モジュール自作のどれにするか。</span></li>
@@ -266,6 +266,7 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
     <table class="log">
       <thead><tr><th>日付</th><th>版</th><th>内容</th></tr></thead>
       <tbody>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.2</td><td>本体を自宅の Raspberry Pi 4 とする方針を反映（暫定）。メモリとストレージは未決。</td></tr>
         <tr><td class="num">2026-10-03</td><td class="num">v0.1</td><td>初版。全体構成、接続方式、ツール案、ロードマップを記載。</td></tr>
       </tbody>
     </table>
