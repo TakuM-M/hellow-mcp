@@ -115,13 +115,13 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 <div class="page">
 
 <header>
-  <div class="meta"><span>hellow-mcp / architecture</span><span>版 <b>v0.2</b></span><span>更新 <b>2026-10-03</b></span><span>状態 <b>構想</b></span></div>
+  <div class="meta"><span>hellow-mcp / architecture</span><span>版 <b>v0.3</b></span><span>更新 <b>2026-10-03</b></span><span>状態 <b>構想</b></span></div>
   <h1>Pi Home MCP 設計図</h1>
-  <p class="lead">自宅の Raspberry Pi で MCP サーバーを動かし、Claude から家のサーバーやセンサーを安全に扱えるようにする。この HTML を設計の正本とし、決まったことをここに反映しながら育てていく。</p>
+  <p class="lead">自宅の Raspberry Pi で MCP サーバーを動かし、Claude から家のサーバーやセンサーを安全に扱えるようにする。このページは設計を理解するための図解で、決まったことを反映しながら育てていく。</p>
 </header>
 
 <section id="overview">
-  <h2><span class="id">A1</span>全体構成</h2>
+  <h2><span class="id">1</span>全体構成</h2>
   <figure>
     <div class="diagram">
       <svg viewBox="0 0 960 440" role="img" aria-label="Claude Desktop と Claude Code は SSH または Tailscale で自宅 LAN の Raspberry Pi 上の MCP サーバーへ接続する。claude.ai は将来 Cloudflare Tunnel と OAuth 経由で接続する。MCP サーバーは許可リストを通して5つのツール群を呼び出す。">
@@ -195,7 +195,7 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 </section>
 
 <section id="transport">
-  <h2><span class="id">A2</span>接続方式</h2>
+  <h2><span class="id">2</span>接続方式</h2>
   <div class="table-wrap">
     <table>
       <thead><tr><th>経路</th><th>使える Claude</th><th>届く範囲</th><th>認証</th><th>状態</th></tr></thead>
@@ -210,7 +210,7 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 </section>
 
 <section id="tools">
-  <h2><span class="id">A3</span>ツール一覧</h2>
+  <h2><span class="id">3</span>ツール一覧</h2>
   <div class="table-wrap">
     <table>
       <thead><tr><th>ツール名</th><th>内容</th><th>種別</th><th>フェーズ</th><th>状態</th></tr></thead>
@@ -229,7 +229,7 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 </section>
 
 <section id="security">
-  <h2><span class="id">A4</span>セキュリティ方針</h2>
+  <h2><span class="id">4</span>セキュリティ方針</h2>
   <ul class="rules">
     <li>任意のシェルコマンドを実行するツールは作らない。</li>
     <li>操作系のツールは <code>config.yaml</code> の許可リストにある対象にだけ効く。</li>
@@ -240,7 +240,7 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 </section>
 
 <section id="roadmap">
-  <h2><span class="id">A5</span>ロードマップ</h2>
+  <h2><span class="id">5</span>ロードマップ</h2>
   <ol class="roadmap">
     <li class="current"><div class="ph">PHASE 0</div><div class="body"><strong>手元の PC で雛形を作る <span class="pill now">次にやる</span></strong><span>Pi なしで FastMCP サーバーと <code>get_system_status</code> を作り、Claude Desktop / Code から呼べることを確認する。</span></div></li>
     <li><div class="ph">PHASE 1</div><div class="body"><strong>Pi に載せて SSH で接続</strong><span>Raspberry Pi OS を用意し、systemd 不要の stdio 起動で①の経路を通す。</span></div></li>
@@ -251,7 +251,7 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 </section>
 
 <section id="open">
-  <h2><span class="id">A6</span>未決事項</h2>
+  <h2><span class="id">6</span>未決事項</h2>
   <ul class="questions">
     <li><b>Raspberry Pi 4 のメモリ容量とストレージ</b><span>本体は自宅の Pi 4 を使う方針（実機で型番を要確認）。メモリ容量は未確認。常時稼働のため USB 接続 SSD からの起動を検討する。</span></li>
     <li><b>実装言語</b><span>暫定で Python（FastMCP）。GPIO・センサーのライブラリが豊富なため。</span></li>
@@ -261,11 +261,12 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 </section>
 
 <section id="changelog">
-  <h2><span class="id">A7</span>変更履歴</h2>
+  <h2><span class="id">7</span>変更履歴</h2>
   <div class="table-wrap">
     <table class="log">
       <thead><tr><th>日付</th><th>版</th><th>内容</th></tr></thead>
       <tbody>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.3</td><td>見出しの番号を A1〜A7 から 1〜7 に変更。このページを理解用の図解と位置づけ直した。</td></tr>
         <tr><td class="num">2026-10-03</td><td class="num">v0.2</td><td>本体を自宅の Raspberry Pi 4 とする方針を反映（暫定）。メモリとストレージは未決。</td></tr>
         <tr><td class="num">2026-10-03</td><td class="num">v0.1</td><td>初版。全体構成、接続方式、ツール案、ロードマップを記載。</td></tr>
       </tbody>

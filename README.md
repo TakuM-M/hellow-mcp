@@ -4,7 +4,7 @@ Run an MCP server on a Raspberry Pi at home so that Claude can work with the hom
 
 ## Design
 
-The source of truth for the system design is [`architecture/index.html`](architecture/index.html). Open it in a browser to view it.
+A visual overview of the system design is in [`architecture/index.html`](architecture/index.html). Open it in a browser to view it.
 
 ## Hardware
 
