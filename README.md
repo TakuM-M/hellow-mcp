@@ -21,3 +21,18 @@ A visual overview of the system design is in [`architecture/index.html`](archite
 |---|---|
 | Language | Python |
 | MCP library | FastMCP |
+
+## Run
+
+```sh
+uv run hellow-mcp
+```
+
+The server speaks MCP over stdio. To use it from Claude Desktop, add this to `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+"hellow-mcp": {
+  "command": "uv",
+  "args": ["--directory", "/path/to/hellow-mcp", "run", "hellow-mcp"]
+}
+```
