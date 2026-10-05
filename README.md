@@ -10,8 +10,8 @@ A visual overview of the system design is in [`architecture/index.html`](archite
 
 | Item | Details |
 |---|---|
-| Board | Raspberry Pi 4 Model B (tentative: planning to use the one at home; to be confirmed on the device) |
-| Memory | Unconfirmed (runs on 2GB or more; 4GB or more recommended if running several Docker containers) |
+| Board | Raspberry Pi 4 Model B (the one at home) |
+| Memory | 4GB |
 | Storage | Undecided (booting from a USB-connected SSD is recommended for always-on use) |
 | Power | USB-C 5V 3A (15W) |
 
