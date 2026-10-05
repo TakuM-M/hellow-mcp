@@ -1,0 +1,279 @@
+<title>Pi Home MCP Design</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: single-column design doc. Diagram -> connections -> tools -> security -> roadmap -> open questions -> changelog */
+:root {
+  --bg: #f6f7f7;
+  --surface: #ffffff;
+  --fg: #1d2326;
+  --muted: #5d676c;
+  --line: #d5dadc;
+  --accent: #b5174b;      /* raspberry: used only for what is being worked on now */
+  --accent-soft: #f7e3ea;
+  --ok: #2f7a4f;
+  --ok-soft: #e1f0e7;
+  --warn: #8a5a00;
+  --warn-soft: #f6ecd6;
+  --font-body: "IBM Plex Sans", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181a; --surface: #1c2124; --fg: #e3e8ea; --muted: #97a2a7; --line: #323a3e;
+    --accent: #f0628f; --accent-soft: #3a1a26; --ok: #6cc394; --ok-soft: #173024;
+    --warn: #e0b45c; --warn-soft: #33290f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14181a; --surface: #1c2124; --fg: #e3e8ea; --muted: #97a2a7; --line: #323a3e;
+  --accent: #f0628f; --accent-soft: #3a1a26; --ok: #6cc394; --ok-soft: #173024;
+  --warn: #e0b45c; --warn-soft: #33290f; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.75;
+  margin: 0; padding-inline: 16px; padding-block: 40px 64px;
+}
+.page { max-width: 960px; margin: 0 auto; display: grid; gap: 48px; }
+h1, h2 { text-wrap: balance; line-height: 1.35; margin: 0; }
+h1 { font-size: 1.9rem; font-weight: 700; }
+h2 { font-size: 1.15rem; font-weight: 700; display: flex; align-items: baseline; gap: 10px; }
+h2 .id { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); font-weight: 400; }
+p { margin: 0; max-width: 65ch; }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+section { display: grid; gap: 16px; min-width: 0; }
+
+header { display: grid; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 24px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: var(--font-mono); font-size: .8rem; color: var(--muted); }
+.meta b { color: var(--fg); font-weight: 500; }
+.lead { color: var(--muted); }
+
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 12px; }
+.diagram { overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 680px; height: auto; color: var(--fg); }
+figcaption { font-size: .85rem; color: var(--muted); }
+svg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+svg .zone { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+svg .pi { fill: var(--bg); stroke: var(--fg); stroke-width: 1.5; }
+svg .hot { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+svg .t { fill: var(--fg); font-family: var(--font-body); font-size: 13px; }
+svg .t-b { fill: var(--fg); font-family: var(--font-body); font-size: 14px; font-weight: 700; }
+svg .t-s { fill: var(--muted); font-family: var(--font-body); font-size: 11.5px; }
+svg .t-m { fill: var(--fg); font-family: var(--font-mono); font-size: 12.5px; font-weight: 500; }
+svg .t-z { fill: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; }
+svg .t-a { fill: var(--accent); font-family: var(--font-body); font-size: 12px; font-weight: 700; }
+svg .e { stroke: currentColor; stroke-width: 1.5; fill: none; }
+svg .e-hot { stroke: var(--accent); stroke-width: 2.2; fill: none; }
+svg .e-future { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 6 5; fill: none; }
+svg .head { fill: currentColor; }
+svg .head-hot { fill: var(--accent); }
+svg .head-future { fill: var(--muted); }
+
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 560px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .75rem; letter-spacing: .06em; color: var(--muted); font-weight: 500; background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.pill { display: inline-block; font-size: .75rem; line-height: 1; padding: 5px 8px; border-radius: 99px; white-space: nowrap; font-weight: 500; }
+.pill.now { background: var(--accent-soft); color: var(--accent); }
+.pill.plan { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.pill.done { background: var(--ok-soft); color: var(--ok); }
+.pill.read { background: var(--ok-soft); color: var(--ok); }
+.pill.write { background: var(--warn-soft); color: var(--warn); }
+
+ul.rules { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; max-width: 70ch; }
+
+ol.roadmap { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+ol.roadmap li { display: grid; grid-template-columns: 88px 1fr; gap: 16px; padding-block: 14px; border-top: 1px solid var(--line); }
+ol.roadmap li:last-child { border-bottom: 1px solid var(--line); }
+ol.roadmap .ph { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); padding-top: 3px; }
+ol.roadmap li.current .ph { color: var(--accent); font-weight: 500; }
+ol.roadmap .body { display: grid; gap: 4px; min-width: 0; }
+ol.roadmap .body strong { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
+
+.questions { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.questions li { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; display: grid; gap: 2px; }
+.questions li b { font-weight: 500; }
+.questions li span { color: var(--muted); font-size: .88rem; }
+
+.log { font-size: .88rem; }
+.log td:first-child { width: 120px; }
+
+@media (max-width: 520px) {
+  h1 { font-size: 1.5rem; }
+  ol.roadmap li { grid-template-columns: 1fr; gap: 4px; }
+}
+</style>
+
+<div class="page">
+
+<header>
+  <div class="meta"><span>hellow-mcp / architecture</span><span>Version <b>v0.5</b></span><span>Updated <b>2026-10-03</b></span><span>Status <b>Concept</b></span></div>
+  <h1>Pi Home MCP Design</h1>
+  <p class="lead">Run an MCP server on the Raspberry Pi at home so that Claude can safely work with the home server and its sensors. This page is a visual overview to help understand the design, and it grows as decisions are made.</p>
+</header>
+
+<section id="overview">
+  <h2><span class="id">1</span>System overview</h2>
+  <figure>
+    <div class="diagram">
+      <svg viewBox="0 0 960 440" role="img" aria-label="Claude Desktop and Claude Code connect to the MCP server on the Raspberry Pi in the home LAN over SSH or Tailscale. claude.ai will later connect through Cloudflare Tunnel with OAuth. The MCP server calls five tool groups through an allowlist.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head"/></marker>
+          <marker id="ah-hot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head-hot"/></marker>
+          <marker id="ah-fu" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head-future"/></marker>
+        </defs>
+
+        <!-- Left: Claude -->
+        <text x="20" y="40" class="t-z">CLAUDE</text>
+        <rect x="20" y="80" width="180" height="90" rx="6" class="box"/>
+        <text x="110" y="118" text-anchor="middle" class="t-b">Claude Desktop</text>
+        <text x="110" y="140" text-anchor="middle" class="t-b">Claude Code</text>
+        <text x="110" y="160" text-anchor="middle" class="t-s">Your PC</text>
+
+        <rect x="20" y="300" width="180" height="70" rx="6" class="box"/>
+        <text x="110" y="330" text-anchor="middle" class="t-b">claude.ai</text>
+        <text x="110" y="352" text-anchor="middle" class="t-s">Web and mobile</text>
+
+        <!-- Middle: internet -->
+        <rect x="270" y="304" width="150" height="62" rx="6" class="box"/>
+        <text x="345" y="331" text-anchor="middle" class="t">Cloudflare</text>
+        <text x="345" y="351" text-anchor="middle" class="t-s">Tunnel + OAuth</text>
+
+        <!-- Right: home LAN -->
+        <rect x="470" y="24" width="470" height="400" rx="10" class="zone"/>
+        <text x="486" y="46" class="t-z">HOME LAN</text>
+        <rect x="496" y="60" width="428" height="350" rx="8" class="pi"/>
+        <text x="512" y="84" class="t-b">Raspberry Pi 4</text>
+        <text x="636" y="84" class="t-s">Runs as the dedicated user mcp</text>
+
+        <rect x="516" y="100" width="160" height="290" rx="6" class="hot"/>
+        <text x="596" y="200" text-anchor="middle" class="t-b">MCP server</text>
+        <text x="596" y="222" text-anchor="middle" class="t-s">Python / FastMCP</text>
+        <line x1="536" y1="244" x2="656" y2="244" stroke="var(--line)" stroke-width="1"/>
+        <text x="596" y="268" text-anchor="middle" class="t-s">Allowlist</text>
+        <text x="596" y="286" text-anchor="middle" class="t-m">config.yaml</text>
+
+        <!-- Tool groups -->
+        <g>
+          <rect x="716" y="100" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="121" class="t-m">system</text><text x="730" y="140" class="t-s">Temperature, disk, memory</text>
+          <rect x="716" y="160" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="181" class="t-m">docker</text><text x="730" y="200" class="t-s">List and restart containers</text>
+          <rect x="716" y="220" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="241" class="t-m">sensors</text><text x="730" y="260" class="t-s">Climate, camera, GPIO</text>
+          <rect x="716" y="280" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="301" class="t-m">home</text><text x="730" y="320" class="t-s">Appliances, Wake-on-LAN</text>
+          <rect x="716" y="340" width="190" height="50" rx="5" class="box"/>
+          <text x="730" y="361" class="t-m">data</text><text x="730" y="380" class="t-s">SQLite (inventory, notes)</text>
+        </g>
+        <path d="M676 125 H712" class="e" marker-end="url(#ah)"/>
+        <path d="M676 185 H712" class="e" marker-end="url(#ah)"/>
+        <path d="M676 245 H712" class="e" marker-end="url(#ah)"/>
+        <path d="M676 305 H712" class="e" marker-end="url(#ah)"/>
+        <path d="M676 365 H712" class="e" marker-end="url(#ah)"/>
+
+        <!-- Connections 1, 2, 3 -->
+        <path d="M200 112 H512" class="e-hot" marker-end="url(#ah-hot)"/>
+        <text x="225" y="104" class="t-a">① SSH + stdio (home LAN)</text>
+        <path d="M200 150 H512" class="e" marker-end="url(#ah)"/>
+        <text x="225" y="142" class="t">② HTTP / Tailscale (away from home)</text>
+        <path d="M200 335 H266" class="e-future" marker-end="url(#ah-fu)"/>
+        <path d="M420 335 H512" class="e-future" marker-end="url(#ah-fu)"/>
+        <text x="228" y="392" class="t-s">③ HTTPS (future, public)</text>
+      </svg>
+    </div>
+    <figcaption>The colored line is the first route to build (①). The dashed route ③ is exposed to the internet, so it waits until authentication is in place. The MCP server runs every tool only through the allowlist.</figcaption>
+  </figure>
+  <p><b>Language: Python with FastMCP.</b> The Pi's camera, GPIO and sensor libraries are best supported in Python, and language speed makes no noticeable difference here, since a tool call spends its time on Claude and the network. To stay ready for growth, each tool group lives in its own module, settings live in <code>config.yaml</code>, and the code uses type hints and tests. Because Claude only sees tool names and their inputs and outputs, any part can later be rewritten in another language such as Go without changing the Claude side.</p>
+</section>
+
+<section id="transport">
+  <h2><span class="id">2</span>Connection methods</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Route</th><th>Claude apps</th><th>Reach</th><th>Authentication</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>① SSH + stdio</td><td>Desktop / Code</td><td>Home LAN only</td><td>SSH key</td><td><span class="pill now">Phase 1</span></td></tr>
+        <tr><td>② HTTP + Tailscale</td><td>Desktop / Code</td><td>Devices on the tailnet</td><td>Tailscale device auth</td><td><span class="pill plan">Phase 3</span></td></tr>
+        <tr><td>③ HTTPS + Cloudflare Tunnel</td><td>claude.ai (web and mobile)</td><td>Internet</td><td>OAuth required</td><td><span class="pill plan">Phase 4</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Custom connectors on claude.ai connect from Anthropic's cloud, so they cannot reach inside Tailscale. Route ③ is needed only for use from a phone.</p>
+</section>
+
+<section id="tools">
+  <h2><span class="id">3</span>Tools</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tool</th><th>What it does</th><th>Type</th><th>Phase</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">get_system_status</td><td>CPU temperature, load, memory, free disk, uptime</td><td><span class="pill read">Read</span></td><td class="num">P0</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">list_services</td><td>State of systemd services and Docker containers</td><td><span class="pill read">Read</span></td><td class="num">P2</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">read_logs</td><td>Last N lines of allowed log files</td><td><span class="pill read">Read</span></td><td class="num">P2</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">restart_container</td><td>Restart only containers on the allowlist</td><td><span class="pill write">Action</span></td><td class="num">P2</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">read_sensor</td><td>Temperature, humidity and pressure from a BME280</td><td><span class="pill read">Read</span></td><td class="num">P3</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">take_snapshot</td><td>Take one photo with the camera and return it</td><td><span class="pill read">Read</span></td><td class="num">P3</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">wake_on_lan</td><td>Wake a registered PC</td><td><span class="pill write">Action</span></td><td class="num">P3</td><td><span class="pill plan">Planned</span></td></tr>
+        <tr><td class="mono">inventory_*</td><td>Manage household inventory and notes in SQLite</td><td><span class="pill write">Action</span></td><td class="num">P3</td><td><span class="pill plan">Planned</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="security">
+  <h2><span class="id">4</span>Security rules</h2>
+  <ul class="rules">
+    <li>Do not build a tool that runs arbitrary shell commands.</li>
+    <li>Action tools only affect targets on the allowlist in <code>config.yaml</code>.</li>
+    <li>Run the MCP server as the dedicated low-privilege user <code>mcp</code>. Add only the permissions Docker operations need.</li>
+    <li>Start with read-only tools, then add action tools one at a time.</li>
+    <li>Never expose the server to the internet without authentication. Build ③ only after OAuth is in place.</li>
+  </ul>
+</section>
+
+<section id="roadmap">
+  <h2><span class="id">5</span>Roadmap</h2>
+  <ol class="roadmap">
+    <li class="current"><div class="ph">PHASE 0</div><div class="body"><strong>Build a skeleton on your PC <span class="pill now">Next</span></strong><span>Without a Pi, build a FastMCP server with <code>get_system_status</code> and confirm Claude Desktop / Code can call it.</span></div></li>
+    <li><div class="ph">PHASE 1</div><div class="body"><strong>Move it to the Pi and connect over SSH</strong><span>Set up Raspberry Pi OS and open route ① by starting the server over stdio, with no systemd needed.</span></div></li>
+    <li><div class="ph">PHASE 2</div><div class="body"><strong>Add server management tools</strong><span>Docker, logs, service state. Add action tools with an allowlist.</span></div></li>
+    <li><div class="ph">PHASE 3</div><div class="body"><strong>Sensors, appliances and remote access</strong><span>BME280, camera, Wake-on-LAN, SQLite. Switch to HTTP and use it from outside through Tailscale (②).</span></div></li>
+    <li><div class="ph">PHASE 4</div><div class="body"><strong>Connect from claude.ai</strong><span>Implement OAuth and make it usable from a phone through Cloudflare Tunnel (③).</span></div></li>
+  </ol>
+</section>
+
+<section id="open">
+  <h2><span class="id">6</span>Open questions</h2>
+  <ul class="questions">
+    <li><b>Raspberry Pi 4 memory and storage</b><span>The plan is to use the Pi 4 at home (model to be confirmed on the device). Memory size is unconfirmed. For always-on use, consider booting from a USB-connected SSD.</span></li>
+    <li><b>How to grant Docker permissions</b><span>The <code>docker</code> group is effectively root. Compare it with allowing only specific commands through sudoers.</span></li>
+    <li><b>Appliance integration</b><span>Choose between the SwitchBot API, Nature Remo, or a homemade infrared module.</span></li>
+  </ul>
+</section>
+
+<section id="changelog">
+  <h2><span class="id">7</span>Changelog</h2>
+  <div class="table-wrap">
+    <table class="log">
+      <thead><tr><th>Date</th><th>Version</th><th>Changes</th></tr></thead>
+      <tbody>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.5</td><td>Decided on Python with FastMCP as the implementation language and removed it from the open questions.</td></tr>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.4</td><td>Translated the page into English.</td></tr>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.3</td><td>Renumbered sections from A1–A7 to 1–7. Repositioned this page as an overview for understanding the design.</td></tr>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.2</td><td>Recorded the plan to use the Raspberry Pi 4 at home (tentative). Memory and storage are still open.</td></tr>
+        <tr><td class="num">2026-10-03</td><td class="num">v0.1</td><td>First version. Added the system overview, connection methods, tool ideas and roadmap.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div>
