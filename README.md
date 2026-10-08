@@ -12,7 +12,7 @@ A visual overview of the system design is in [`architecture/index.html`](archite
 |---|---|
 | Board | Raspberry Pi 4 Model B (the one at home) |
 | Memory | 4GB |
-| Storage | Undecided (booting from a USB-connected SSD is recommended for always-on use) |
+| Storage | microSD card |
 | Power | USB-C 5V 3A (15W) |
 
 ## Tech stack
