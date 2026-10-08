@@ -115,7 +115,7 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 <div class="page">
 
 <header>
-  <div class="meta"><span>hellow-mcp / architecture</span><span>Version <b>v0.6</b></span><span>Updated <b>2026-10-05</b></span><span>Status <b>Concept</b></span></div>
+  <div class="meta"><span>hellow-mcp / architecture</span><span>Version <b>v0.8</b></span><span>Updated <b>2026-10-08</b></span><span>Status <b>Concept</b></span></div>
   <h1>Pi Home MCP Design</h1>
   <p class="lead">Run an MCP server on the Raspberry Pi at home so that Claude can safely work with the home server and its sensors. This page is a visual overview to help understand the design, and it grows as decisions are made.</p>
 </header>
@@ -254,7 +254,6 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
 <section id="open">
   <h2><span class="id">6</span>Open questions</h2>
   <ul class="questions">
-    <li><b>Raspberry Pi 4 memory and storage</b><span>The plan is to use the Pi 4 at home (model to be confirmed on the device). Memory size is unconfirmed. For always-on use, consider booting from a USB-connected SSD.</span></li>
     <li><b>How to grant Docker permissions</b><span>The <code>docker</code> group is effectively root. Compare it with allowing only specific commands through sudoers.</span></li>
     <li><b>Appliance integration</b><span>Choose between the SwitchBot API, Nature Remo, or a homemade infrared module.</span></li>
   </ul>
@@ -266,6 +265,8 @@ ol.roadmap .body span { color: var(--muted); font-size: .9rem; }
     <table class="log">
       <thead><tr><th>Date</th><th>Version</th><th>Changes</th></tr></thead>
       <tbody>
+        <tr><td class="num">2026-10-08</td><td class="num">v0.8</td><td>Decided on storage: the Pi boots from a microSD card. Removed it from the open questions.</td></tr>
+        <tr><td class="num">2026-10-05</td><td class="num">v0.7</td><td>Confirmed the board: Raspberry Pi 4 Model B with 4GB of memory. Storage is still open.</td></tr>
         <tr><td class="num">2026-10-05</td><td class="num">v0.6</td><td>Completed Phase 0: FastMCP server with <code>get_system_status</code>, packaged under <code>src/hellow_mcp</code>.</td></tr>
         <tr><td class="num">2026-10-03</td><td class="num">v0.5</td><td>Decided on Python with FastMCP as the implementation language and removed it from the open questions.</td></tr>
         <tr><td class="num">2026-10-03</td><td class="num">v0.4</td><td>Translated the page into English.</td></tr>
