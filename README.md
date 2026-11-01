@@ -54,3 +54,14 @@ Claude cannot type an SSH key passphrase, so on macOS store it in the Keychain o
 Host raspberrypi.local
     UseKeychain yes
 ```
+
+### Docker permissions
+
+Do not add `mcp` to the `docker` group, because that group is effectively root. Allow only the commands the tools run. Run `sudo visudo -f /etc/sudoers.d/hellow-mcp` and add one `restart` line for each container in `allowed_containers` in `config.yaml`:
+
+```
+mcp ALL=(root) NOPASSWD: /usr/bin/docker ps --all --format json
+mcp ALL=(root) NOPASSWD: /usr/bin/docker restart CONTAINER_NAME
+```
+
+Add these rules right after you install Docker. When Docker is installed and the `docker ps` rule is missing, `list_services` fails.
