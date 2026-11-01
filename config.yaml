@@ -1,0 +1,2 @@
+allowed_log_files:
+  - /var/log/dpkg.log
