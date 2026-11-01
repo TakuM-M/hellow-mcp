@@ -380,12 +380,14 @@ source = { editable = "." }
 dependencies = [
     { name = "fastmcp" },
     { name = "psutil" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "fastmcp", specifier = ">=4.0.11" },
     { name = "psutil", specifier = ">=7.2.2" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
 ]
 
 [[package]]
